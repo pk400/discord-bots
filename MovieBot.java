@@ -57,12 +57,16 @@ public class MovieBot extends DiscordClient {
 		reader = new JsonReader();
 		JSONObject json = reader.readJsonFromUrl(movie);
 		try {
-			m.reply("Title: " + json.get("Title") + "", this);
-			m.reply("Rated: " + json.get("Rated") + "", this);
-			m.reply("Runtime: " + json.get("Runtime") + "", this);
-			m.reply("Released: " + json.get("Released") + "", this);
-			m.reply("Country: " + json.get("Country") + "", this);
-			m.reply("IMDB rating: " + json.get("imdbRating") + "", this);
+			String content = "\\n" +"Title: " + json.get("Title") + "\\n";
+			content +=  "Genre: " + json.get("Genre") + "\\n";
+			content +=  "Rated: " + json.get("Rated") + "\\n";
+			content += "Runtime: " + json.get("Runtime") + "\\n";
+			content += "Released: " + json.get("Released") + "\\n";
+			content += "Country: " + json.get("Country") + "\\n";
+			content += "IMDB rating: " + json.get("imdbRating") + "\\n";
+			
+			m.reply(content, this);
+			
 		} catch (IOException | ParseException e) {
 			e.printStackTrace();
 		}
@@ -97,6 +101,7 @@ public class MovieBot extends DiscordClient {
 			if (movie == null) {
 				content = "you did not add a movie" + expressionString;
 				moodValue -= 10;
+				return;
 			} else {
 				movies.add(movie);
 				content = "I have added " + movie + "" + expressionString;
@@ -109,15 +114,18 @@ public class MovieBot extends DiscordClient {
 			}
 		} else if (m.getContent().startsWith("@roulette")) {
 			try {
+				Random rand = new Random();
+				int movieIndex = 0;
 				if (movies.isEmpty()) {
 					content = "there are no movies in the list" + expressionString;
+					return;
 				} else {
-					Random rand = new Random();
-					int movieIndex = rand.nextInt(movies.size()) + 1;
+					movieIndex = rand.nextInt(movies.size()) + 1;
 					content = "roulette says to watch " + movies.elementAt(movieIndex - 1) + "" + expressionString;
 				}
 
 				m.reply(content, this);
+				movieHelper("http://www.omdbapi.com/?t=" + movies.elementAt(movieIndex - 1), m);
 			} catch (IOException | ParseException e) {
 				e.printStackTrace();
 			}
@@ -147,7 +155,7 @@ public class MovieBot extends DiscordClient {
 		if (moodValue < 0)
 			moodValue = 0;
 
-		if (moodValue >= 90)
+		if (moodValue > 90)
 			mood = Mood.Happy;
 		else
 			mood = Mood.Angry;
@@ -162,20 +170,32 @@ public class MovieBot extends DiscordClient {
 	@Override
 	public void onMentioned(Message m) {
 
-		String[] greetings = { "hello", "greetings", "morning", "evening" };
+		String[] greetings = { "hello", "greetings", "morning", "evening" ,"hi", "hey"};
 		String[] jokes = { "chicken", "black", "banana", "joke", "american", "canadian" };
 		String[] moods = { "how are you", "what is your mood", "feeling" };
 		String[] appreciate = { "thank you", "ty", "thx", "tyvm", "thanks" };
 		String[] calmDown = { "chill", "calm down", "relax" };
 
 		for (String s : greetings) {
-			if (m.getContent().toLowerCase().contains(s)) {
+			if (m.getContent().toLowerCase().contains(s) && !m.getContent().toLowerCase().contains("chill")) {
 				try {
-					if (mood.equals(Mood.Happy)) {
-						m.reply("hello!", this);
-					} else if (mood.equals(Mood.Angry))
-						m.reply("whatever man.", this);
+					moodValue -= 6;
+					if (moodValue > 90) 
+						m.reply("WOOOO HELLOOO!", this);
+					else if (moodValue > 80 && moodValue <= 90){
+						m.reply("hey!", this);
+					} else if(moodValue > 70 && moodValue <= 80){
+						m.reply("hey.", this);
+					}else if(moodValue > 60 && moodValue <= 70){
+						m.reply("hi.", this);
+					}else if(moodValue > 50 && moodValue <= 60){
+						m.reply("what is it?", this);
+					}
+					else if (moodValue <= 50)
+						m.reply("stop fucking asking man.", this);
 
+				
+					
 				} catch (IOException | ParseException e) {
 					e.printStackTrace();
 				}
@@ -186,6 +206,7 @@ public class MovieBot extends DiscordClient {
 		for (String s : jokes) {
 			if (m.getContent().toLowerCase().contains(s)) {
 				try {
+					moodValue += 15;
 					if (mood.equals(Mood.Happy)) {
 						if (s.equals("black"))
 							m.reply("haha I love " + s + " people", this);
@@ -194,7 +215,7 @@ public class MovieBot extends DiscordClient {
 					} else if (mood.equals(Mood.Angry))
 						m.reply("are you trying to be funny?", this);
 
-					moodValue += 15;
+					
 
 				} catch (IOException | ParseException e) {
 					e.printStackTrace();
@@ -206,12 +227,14 @@ public class MovieBot extends DiscordClient {
 		for (String s : calmDown) {
 			if (m.getContent().toLowerCase().contains(s)) {
 				try {
+					moodValue += 15;
+					
 					if (mood.equals(Mood.Happy))
 						m.reply("I am very relaxed.", this);
 					else if (mood.equals(Mood.Angry))
 						m.reply("I'll try.", this);
 
-					moodValue += 15;
+					
 
 				} catch (IOException | ParseException e) {
 					e.printStackTrace();
@@ -238,8 +261,8 @@ public class MovieBot extends DiscordClient {
 			if (m.getContent().toLowerCase().contains(s)) {
 				try {
 					if (mood.equals(Mood.Happy)) {
-						m.reply("no problem.", this);
 						moodValue += 10;
+						m.reply("no problem.", this);
 					}
 					if (mood.equals(Mood.Angry)) {
 						m.reply("fuck you.", this);
