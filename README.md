@@ -1,7 +1,9 @@
 # Discord Bots
 
-# Alice-Bot
-@dump
-"Alice go play"
+## Alice-Bot
+### Commands
+* @dump
+* "Alice go play"
 
-# MovieBot
+## MovieBot
+### Commands
