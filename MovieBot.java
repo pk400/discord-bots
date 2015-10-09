@@ -56,17 +56,30 @@ public class MovieBot extends DiscordClient {
      */
     @Override
     public void onMessageReceive(Message m) {
+    	
+    	String content = "";
+    	String expressionString = "";
+    	if(mood.equals(Mood.Angry)){
+    		expressionString = "!!!!";
+    	}else if(mood.equals(Mood.Happy)){
+    		expressionString = ".";
+    	}
+    	
         if (m.getContent().startsWith("@addMovie")) {
+        	String movie = null;
+        	try{
+        		movie = m.getContent().split(" ", 2)[1];
+        	}catch(ArrayIndexOutOfBoundsException e){
+        		movie = null;
+        	}
         	
-        	moodValue -= 10;
-        	
-        	String movie = m.getContent().split(" ", 2)[1];
-        	String content = "";
-        	if(movie.isEmpty())
-        		content = "you did not add a movie.";
+        	if(movie == null){
+        		content = "you did not add a movie" + expressionString;
+        		moodValue -= 10;
+        	}
         	else{
         		movies.add(movie);
-        		content = "I have added "+movie+".";
+        		content = "I have added "+movie+""+expressionString;
         	}
             try {
             	m.reply(content, this);
@@ -75,13 +88,12 @@ public class MovieBot extends DiscordClient {
             }
         } else if(m.getContent().startsWith("@roulette")){
         	try{
-        		String content = "";
         		if(movies.isEmpty()){
-        			content = "there are no movies in the list.";
+        			content = "there are no movies in the list"+expressionString;
         		}else{
         			Random rand = new Random();
         			int movieIndex= rand.nextInt(movies.size()) + 1;
-            		content = "roulette says to watch "+movies.elementAt(movieIndex-1)+".";
+            		content = "roulette says to watch "+movies.elementAt(movieIndex-1)+""+expressionString;
         		}
         		
         		m.reply(content, this);
@@ -91,11 +103,13 @@ public class MovieBot extends DiscordClient {
         } else if(m.getContent().startsWith("@reset")) {
             try {
             	movies = new Vector<String>();
-            	m.reply("all movies are removed from the list.", this);
+            	m.reply("all movies are removed from the list"+expressionString, this);
             } catch (IOException | ParseException e) {
                 e.printStackTrace();
             }
         }
+        
+        moodValue--;
     }
 
     /**
@@ -115,7 +129,6 @@ public class MovieBot extends DiscordClient {
     		mood = Mood.Happy;
     	else
     		mood = Mood.Angry;
-    	
     }
 
     /**
@@ -126,7 +139,65 @@ public class MovieBot extends DiscordClient {
     @Override
     public void onMentioned(Message m) {
     	
-    	String[] moods = {"how are you?", "how are you feeling?","what is your mood?"};
+    	String[] greetings = {"hello","greetings","morning","evening"};
+    	String[] jokes = {"chicken","black","banana","joke","american","canadian"};
+    	String[] moods = {"how are you","what is your mood","feeling"};
+    	String[] appreciate = {"thank you", "ty", "thx", "tyvm", "thanks"};
+    	String[] calmDown = {"chill", "calm down", "relax"};
+    	
+    	for(String s : greetings){
+   		 	if (m.getContent().toLowerCase().contains(s)) {
+	            try {
+	            	if(mood.equals(Mood.Happy)){
+	            		m.reply("hello!", this);
+	            	}
+	            	else if(mood.equals(Mood.Angry))
+	            		m.reply("whatever man.", this);
+	            	
+	            } catch (IOException | ParseException e) {
+	                e.printStackTrace();
+	            }
+	            return;
+	        }
+    	}
+    	
+    	for(String s : jokes){
+   		 	if (m.getContent().toLowerCase().contains(s)) {
+	            try {
+	            	if(mood.equals(Mood.Happy)){
+	            		if(s.equals("black"))
+	            			m.reply("haha I love "+s+" people", this);
+	            		else
+	            			m.reply("haha I love "+s+"s", this);
+	            	}
+	            	else if(mood.equals(Mood.Angry))
+	            		m.reply("are you trying to be funny?", this);
+	            	
+	            	moodValue += 15;
+	            	
+	            } catch (IOException | ParseException e) {
+	                e.printStackTrace();
+	            }
+	            return;
+	        }
+    	}
+    	
+    	for(String s : calmDown){
+   		 	if (m.getContent().toLowerCase().contains(s)) {
+	            try {
+	            	if(mood.equals(Mood.Happy))
+	            		m.reply("I am very relaxed.", this);
+	            	else if(mood.equals(Mood.Angry))
+	            		m.reply("I'll try.", this);
+	            	
+	            	moodValue += 15;
+	            	
+	            } catch (IOException | ParseException e) {
+	                e.printStackTrace();
+	            }
+	            return;
+	        }
+    	}
     	
     	for(String s : moods){
     		 if (m.getContent().toLowerCase().contains(s)) {
@@ -138,24 +209,29 @@ public class MovieBot extends DiscordClient {
  	            } catch (IOException | ParseException e) {
  	                e.printStackTrace();
  	            }
+ 	            return;
  	        }
     	}
-    	
-    	String[] appreciate = {"thank you", "ty", "thx", "tyvm", "thanks"};
-    	
+
     	for(String s : appreciate){
 	        if (m.getContent().toLowerCase().contains(s)) {
-	        	
-	        	moodValue += 10;
-	        	
 	            try {
-	            	if(mood.equals(Mood.Happy))
+	            	if(mood.equals(Mood.Happy)){
 	            		m.reply("no problem.", this);
-	            	else if(mood.equals(Mood.Angry))
+	            		moodValue += 10;
+	            	}
+	            	if(mood.equals(Mood.Angry)){
 	            		m.reply("fuck you.", this);
+	            		moodValue += 10;
+		            	if(mood.equals(Mood.Happy))
+		            		m.reply("I take it back.", this);
+	            	}
+	            	
+	            	
 	            } catch (IOException | ParseException e) {
 	                e.printStackTrace();
 	            }
+	            return;
 	        }
     	}
     	
