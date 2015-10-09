@@ -7,3 +7,8 @@
 
 ## MovieBot
 ### Commands
+* @addMovie
+* @roulette
+* @reset
+* Appreciation
+* Ask mood

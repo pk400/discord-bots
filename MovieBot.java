@@ -7,6 +7,8 @@ import sx.blah.discord.obj.User;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.Random;
+import java.util.Vector;
 
 /**
  * @author qt
@@ -16,6 +18,19 @@ import java.net.URISyntaxException;
  * Responds to users that @mention you.
  */
 public class MovieBot extends DiscordClient {
+	
+	/*
+	 * Variables and all that
+	 * 
+	 */
+	
+	private Vector<String> movies;
+	private int moodValue;
+	private Mood mood;
+	private enum Mood{
+		Angry, Happy;
+	};
+	
     /**
      * Sets up the bot.
      *
@@ -28,6 +43,10 @@ public class MovieBot extends DiscordClient {
     public MovieBot(String email, String password)
             throws URISyntaxException, IOException, ParseException {
         super(email, password);
+        
+        movies = new Vector<String>();
+        moodValue = 100;
+        mood = Mood.Happy;
     }
 
     /**
@@ -37,28 +56,43 @@ public class MovieBot extends DiscordClient {
      */
     @Override
     public void onMessageReceive(Message m) {
-        if (m.getContent().startsWith(".meme")
-                || m.getContent().startsWith(".nicememe")) {
+        if (m.getContent().startsWith("@addMovie")) {
+        	
+        	moodValue -= 10;
+        	
+        	String movie = m.getContent().split(" ", 2)[1];
+        	String content = "";
+        	if(movie.isEmpty())
+        		content = "you did not add a movie.";
+        	else{
+        		movies.add(movie);
+        		content = "I have added "+movie+".";
+        	}
             try {
-                m.reply("http://niceme.me/", this);
+            	m.reply(content, this);
             } catch (IOException | ParseException e) {
                 e.printStackTrace();
             }
-        } else if (m.getContent().startsWith(".clear")) {
-            this.getChannelByID(m.getChannelID()).getMessages().stream().filter(message -> message.getAuthor().getID().equalsIgnoreCase(this.getOurUser().getID())).forEach(message -> {
-	            try {
-		            Discord4J.logger.debug("Attempting deletion of message {} by \"{}\" ({})", message.getMessageID(), message.getAuthor().getName(), message.getContent());
-		            this.deleteMessage(message.getMessageID(), message.getChannelID());
-	            } catch (IOException e) {
-		            Discord4J.logger.error("Couldn't delete message {} ({}).", message.getMessageID(), e.getMessage());
-	            }
-            });
-        } else if (m.getContent().startsWith(".name ")) {
-            String s = m.getContent().split(" ", 2)[1];
+        } else if(m.getContent().startsWith("@roulette")){
+        	try{
+        		String content = "";
+        		if(movies.isEmpty()){
+        			content = "there are no movies in the list.";
+        		}else{
+        			Random rand = new Random();
+        			int movieIndex= rand.nextInt(movies.size()) + 1;
+            		content = "roulette says to watch "+movies.elementAt(movieIndex-1)+".";
+        		}
+        		
+        		m.reply(content, this);
+        	} catch (IOException | ParseException e) {
+                e.printStackTrace();
+            }
+        } else if(m.getContent().startsWith("@reset")) {
             try {
-                this.changeAccountInfo(s, "", "");
-                m.reply("is this better?", this);
-            } catch (ParseException | IOException e) {
+            	movies = new Vector<String>();
+            	m.reply("all movies are removed from the list.", this);
+            } catch (IOException | ParseException e) {
                 e.printStackTrace();
             }
         }
@@ -71,6 +105,17 @@ public class MovieBot extends DiscordClient {
      */
     @Override
     public void onMessageSend(Message m) {
+    	
+    	if(moodValue > 100)
+    		moodValue = 100;
+    	if(moodValue < 0 )
+    		moodValue = 0;
+    	
+    	if(moodValue >= 90)
+    		mood = Mood.Happy;
+    	else
+    		mood = Mood.Angry;
+    	
     }
 
     /**
@@ -79,23 +124,41 @@ public class MovieBot extends DiscordClient {
      * @param message Message sent
      */
     @Override
-    public void onMentioned(Message message) {
-        try {
-            if (message.getContent().contains("https://discord.gg/")
-                    || message.getContent().contains("http://discord.gg/")) {
-                String invite = message.getContent().split(".gg/")[1].split(" ")[0];
-                Discord4J.logger.debug("Received invite code \"{}\"", invite);
-                Invite invite1 = this.acceptInvite(invite);
-                if (null != invite1) {
-                    this.sendMessage(String.format("Hello, %s! I was invited to the %s channel by @%s.",
-                            invite1.getGuildName(), invite1.getChannelName(), invite1.getInviterUsername()), invite1.getChannelID(), invite1.getInviterID());
-                }
-            } else {
-                this.sendMessage(message.getAuthor().getAvatarURL(), message.getChannelID());
-            }
-        } catch (IOException | ParseException e) {
-            e.printStackTrace();
-        }
+    public void onMentioned(Message m) {
+    	
+    	String[] moods = {"how are you?", "how are you feeling?","what is your mood?"};
+    	
+    	for(String s : moods){
+    		 if (m.getContent().toLowerCase().contains(s)) {
+ 	            try {
+ 	            	if(mood.equals(Mood.Happy))
+ 	            		m.reply("I am happy.", this);
+ 	            	else if(mood.equals(Mood.Angry))
+ 	            		m.reply("I am mad.", this);
+ 	            } catch (IOException | ParseException e) {
+ 	                e.printStackTrace();
+ 	            }
+ 	        }
+    	}
+    	
+    	String[] appreciate = {"thank you", "ty", "thx", "tyvm", "thanks"};
+    	
+    	for(String s : appreciate){
+	        if (m.getContent().toLowerCase().contains(s)) {
+	        	
+	        	moodValue += 10;
+	        	
+	            try {
+	            	if(mood.equals(Mood.Happy))
+	            		m.reply("no problem.", this);
+	            	else if(mood.equals(Mood.Angry))
+	            		m.reply("fuck you.", this);
+	            } catch (IOException | ParseException e) {
+	                e.printStackTrace();
+	            }
+	        }
+    	}
+    	
     }
 
     /**
