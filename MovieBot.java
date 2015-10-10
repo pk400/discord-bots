@@ -64,6 +64,8 @@ public class MovieBot extends DiscordClient {
 			content += "Released: " + json.get("Released") + "\\n";
 			content += "Country: " + json.get("Country") + "\\n";
 			content += "IMDB rating: " + json.get("imdbRating") + "\\n";
+			content += "http:\\/\\/www.imdb.com\\/title\\/" + json.get("imdbID") + "\\/";
+
 			
 			m.reply(content, this);
 			
@@ -177,7 +179,7 @@ public class MovieBot extends DiscordClient {
 		String[] calmDown = { "chill", "calm down", "relax" };
 
 		for (String s : greetings) {
-			if (m.getContent().toLowerCase().contains(s) && !m.getContent().toLowerCase().contains("chill")) {
+			if (m.getContent().toLowerCase().contains(s) && !m.getContent().toLowerCase().contains("chill") && !m.getContent().toLowerCase().contains("chicken")) {
 				try {
 					moodValue -= 6;
 					if (moodValue > 90) 
