@@ -1,4 +1,4 @@
-package sx.blah.discord;
+package modules;
 
 import java.io.BufferedReader;
 import java.io.IOException;
