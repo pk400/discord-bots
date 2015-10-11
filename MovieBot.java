@@ -22,6 +22,7 @@ import sx.blah.discord.Discord4J;
 import sx.blah.discord.DiscordClient;
 import sx.blah.discord.handle.IListener;
 import sx.blah.discord.handle.impl.events.InviteReceivedEvent;
+import sx.blah.discord.handle.impl.events.MentionEvent;
 import sx.blah.discord.handle.impl.events.MessageDeleteEvent;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.Channel;
@@ -29,6 +30,7 @@ import sx.blah.discord.handle.obj.Invite;
 import sx.blah.discord.handle.obj.Message;
 
 import java.io.IOException;
+import java.util.Random;
 import java.util.Vector;
 
 /**
@@ -38,7 +40,7 @@ import java.util.Vector;
  * <p>
  * Responds to users that @mention you.
  */
-public class MovieBot {
+public class MovieBot extends BlankBot{
 
 	/**
 	 * Starts the bot. This can be done any place you want.
@@ -48,36 +50,96 @@ public class MovieBot {
 	 */
 
 	private Vector<Movie> movies;
-	private float mood;
 	
 	public MovieBot(String... args){
-		this.mood = 100;
+		super();
 		this.movies = new Vector<Movie>();
-
 		this.run(args[0], args[1]);
 	}
 	
-	public void run(String... args){
+	private String movieRoulette(){
+		if(movies.isEmpty()){
+			return "you have not added any movies or shows yet.";
+		}else{
+			Random rand = new Random();
+			int i = rand.nextInt(movies.size());
+			return movies.elementAt(i).getContent();
+		}
+	}
+	
+	private String listMovies(){
+		if(movies.isEmpty()){
+			return "you have not added any movies or shows yet.";
+		}else{
+			String returnString = "";
+			for(Movie mv : movies)
+				returnString =  returnString + "\\n" + mv.getTitle();
+			return returnString;
+		}
+	}
+	
+	private void run(String... args){
 		try {
 			DiscordClient.get().login(args[0], args[1]);
 
 			DiscordClient.get().getDispatcher().registerListener(new IListener<MessageReceivedEvent>() {
 				@Override public void receive(MessageReceivedEvent messageReceivedEvent) {
 					Message m = messageReceivedEvent.getMessage();
-					if (m.getContent().startsWith("@addMovie")) {
-						
-						String movie = m.getContent().split(" ", 2)[1];
-						String reply = "";
-						
-						movies.add(new Movie(movie));
-						reply = movies.lastElement().content();
-						
+					String replyString = "";
+					
+					/*
+					 * Movie stuff starts here
+					 */
+					if (m.getContent().startsWith("@addMovie")
+							|| m.getContent().startsWith("@add")) {
+						Movie movie = new Movie(m.getContent().split(" ", 2)[1]);
+						if(!movie.isValid())
+							replyString = "**sorry, but I could not add: **"+m.getContent().split(" ", 2)[1]+".";
+						else{
+							movies.add(movie);
+							replyString = movies.lastElement().getContent();
+						}
 						try {
-							m.reply(reply);
+							m.reply(replyString);
 						} catch (IOException | ParseException e) {
 							e.printStackTrace();
 						}
-					} else if (m.getContent().startsWith("@clear")) {
+					} else if (m.getContent().startsWith("@movieRoulette")
+							|| m.getContent().startsWith("@roulette")) {
+						try {
+							m.reply(movieRoulette());
+						} catch (IOException | ParseException e) {
+							e.printStackTrace();
+						}
+					} else if (m.getContent().startsWith("@listMovies")
+							|| m.getContent().startsWith("@movies")
+							|| m.getContent().startsWith("@list")){
+						try {
+							m.reply(listMovies());
+						} catch (IOException | ParseException e) {
+							e.printStackTrace();
+						}
+					} else if (m.getContent().startsWith("@movie")
+							|| m.getContent().startsWith("@info")){
+						Movie movie = new Movie(m.getContent().split(" ", 2)[1]);
+						if(!movie.isValid())
+							replyString = "**sorry, but I could not find information about: **"+m.getContent().split(" ", 2)[1]+".";
+						else
+							replyString = movie.getContent();
+						try {
+							m.reply(replyString);
+						} catch (IOException | ParseException e) {
+							e.printStackTrace();
+						}
+					}
+					/*
+					 * Movie stuff ends here
+					 */
+					
+					/*
+					 * Other stuff starts here
+					 */
+					else if (m.getContent().startsWith("@clear")) {
 						Channel c = DiscordClient.get().getChannelByID(m.getChannelID());
 						if (null != c) {
 							c.getMessages().stream().filter(message -> message.getAuthor().getID()
@@ -91,9 +153,13 @@ public class MovieBot {
 							});
 						}
 					}
+					
+					/*
+					 * Other stuff ends here
+					 */
 				}
 			});
-
+			
 			DiscordClient.get().getDispatcher().registerListener(new IListener<InviteReceivedEvent>() {
 				@Override public void receive(InviteReceivedEvent event) {
 					Invite invite = event.getInvite();
@@ -108,16 +174,20 @@ public class MovieBot {
 
 				}
 			});
-
-			DiscordClient.get().getDispatcher().registerListener(new IListener<MessageDeleteEvent>() {
-				@Override public void receive(MessageDeleteEvent event) {
+			
+			DiscordClient.get().getDispatcher().registerListener(new IListener<MentionEvent>() {
+				@Override public void receive(MentionEvent event) {
+					Message m = event.getMessage();
+					String replyString = thoughts();
 					try {
-						event.getMessage().reply("you said, \\\"" + event.getMessage().getContent() + "\\\"");
-					} catch (Exception e) {
+						m.reply(replyString);
+					} catch (IOException | ParseException e) {
+						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 				}
 			});
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
