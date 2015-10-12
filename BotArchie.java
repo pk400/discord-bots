@@ -47,10 +47,12 @@ public class BotArchie {
 				try {
 					if(os.contains("windows")) {
 						bw = new BufferedWriter(
-								new FileWriter(m.getChannelID().toString() + ".txt", true));
+								new FileWriter(m.getChannelID().toString() 
+										+ ".txt", true));
 					} else {
 						bw = new BufferedWriter(new FileWriter(
-								"/usr/share/nginx/html/logs/" + m.getChannelID().toString() + ".txt", true));
+								"/usr/share/nginx/html/logs/" 
+										+ m.getChannelID().toString() + ".txt", true));
 					}
 					bw.write(addlog.toString());
 					bw.newLine();
@@ -63,7 +65,8 @@ public class BotArchie {
 				
 				if(m.getContent().equals("/log")) {
 					try {
-						m.reply("http://54.172.169.246/logs/" + m.getChannelID().toString() + ".txt");
+						m.reply("http://54.172.169.246/logs/" 
+								+ m.getChannelID().toString() + ".txt");
 					} catch (IOException | ParseException e) {
 						e.printStackTrace();
 					}
