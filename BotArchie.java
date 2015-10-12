@@ -1,6 +1,7 @@
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -18,6 +19,7 @@ public class BotArchie {
 	// TODO: move these to file on server later
 	private final static String botemail 	= "botarchie400@cock.li";
 	private final static String botpass 	= "abc123";
+	private final static String os = System.getProperty("os.name").toLowerCase();
 	
 	public static void main(String... args) 
 			throws IOException, ParseException, URISyntaxException {
@@ -30,7 +32,7 @@ public class BotArchie {
 			@Override
 			public void receive(MessageReceivedEvent event) {
 				Message m = event.getMessage();
-
+				
 				//------------------------------------------------------------//
 				// WRITE TO LOG
 				DateTimeFormatter dtf = 
@@ -43,8 +45,13 @@ public class BotArchie {
 				
 				BufferedWriter bw = null;
 				try {
-					bw = new BufferedWriter(
-							new FileWriter(m.getChannelID().toString() + ".log", true));
+					if(os.contains("windows")) {
+						bw = new BufferedWriter(
+								new FileWriter(m.getChannelID().toString() + ".txt", true));
+					} else {
+						bw = new BufferedWriter(new FileWriter(
+								"/usr/share/nginx/html/logs/" + m.getChannelID().toString() + ".txt", true));
+					}
 					bw.write(addlog.toString());
 					bw.newLine();
 					bw.flush();
@@ -53,25 +60,10 @@ public class BotArchie {
 				} catch(IOException e) {
 					e.printStackTrace();
 				}
-				//------------------------------------------------------------//
-									
+				
 				if(m.getContent().equals("/log")) {
-					BufferedReader br = null;
 					try {
-						br = new BufferedReader(
-								new FileReader(m.getChannelID().toString() + ".log"));
-						StringBuilder sb = new StringBuilder();
-						String line;
-						
-						sb.append("_**From " + m.getChannelID().toString() + "**_\\n\\n");
-						
-						while((line = br.readLine()) != null) {
-							sb.append(line);
-						}
-						
-						br.close();
-						
-						m.reply(sb.toString());
+						m.reply("http://54.172.169.246/logs/" + m.getChannelID().toString() + ".txt");
 					} catch (IOException | ParseException e) {
 						e.printStackTrace();
 					}
