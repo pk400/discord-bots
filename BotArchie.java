@@ -50,9 +50,10 @@ public class BotArchie {
 								new FileWriter(m.getChannelID().toString() 
 										+ ".txt", true));
 					} else {
-						bw = new BufferedWriter(new FileWriter(
-								"/usr/share/nginx/html/logs/" 
-										+ m.getChannelID().toString() + ".txt", true));
+						bw = new BufferedWriter(
+								new FileWriter("/usr/share/nginx/html/logs/" 
+										+ m.getChannelID().toString() 
+										+ ".txt", true));
 					}
 					bw.write(addlog.toString());
 					bw.newLine();
