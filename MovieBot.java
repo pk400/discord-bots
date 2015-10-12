@@ -23,7 +23,6 @@ import sx.blah.discord.DiscordClient;
 import sx.blah.discord.handle.IListener;
 import sx.blah.discord.handle.impl.events.InviteReceivedEvent;
 import sx.blah.discord.handle.impl.events.MentionEvent;
-import sx.blah.discord.handle.impl.events.MessageDeleteEvent;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.Channel;
 import sx.blah.discord.handle.obj.Invite;
@@ -59,6 +58,7 @@ public class MovieBot extends BlankBot{
 	
 	private String movieRoulette(){
 		if(movies.isEmpty()){
+			subtractMoodVal(3);
 			return "you have not added any movies or shows yet.";
 		}else{
 			Random rand = new Random();
@@ -69,6 +69,7 @@ public class MovieBot extends BlankBot{
 	
 	private String listMovies(){
 		if(movies.isEmpty()){
+			subtractMoodVal(3);
 			return "you have not added any movies or shows yet.";
 		}else{
 			String returnString = "";
@@ -78,7 +79,19 @@ public class MovieBot extends BlankBot{
 		}
 	}
 	
-	private void run(String... args){
+	private String resetMovies(){
+		if(movies.isEmpty()){
+			subtractMoodVal(3);
+			return "you have not added any movies or shows yet.";
+		}else{
+			String returnString = "I have reset the list.";
+			movies = new Vector<>();
+			return returnString;
+		}
+	}
+	
+	
+	protected void run(String... args){
 		try {
 			DiscordClient.get().login(args[0], args[1]);
 
@@ -86,6 +99,7 @@ public class MovieBot extends BlankBot{
 				@Override public void receive(MessageReceivedEvent messageReceivedEvent) {
 					Message m = messageReceivedEvent.getMessage();
 					String replyString = "";
+					subtractMoodVal(1);
 					
 					/*
 					 * Movie stuff starts here
@@ -116,6 +130,14 @@ public class MovieBot extends BlankBot{
 							|| m.getContent().startsWith("@list")){
 						try {
 							m.reply(listMovies());
+						} catch (IOException | ParseException e) {
+							e.printStackTrace();
+						}
+					} else if (m.getContent().startsWith("@reset")
+							|| m.getContent().startsWith("@resetMovies")
+							|| m.getContent().startsWith("@resetList")){
+						try {
+							m.reply(resetMovies());
 						} catch (IOException | ParseException e) {
 							e.printStackTrace();
 						}
@@ -178,7 +200,8 @@ public class MovieBot extends BlankBot{
 			DiscordClient.get().getDispatcher().registerListener(new IListener<MentionEvent>() {
 				@Override public void receive(MentionEvent event) {
 					Message m = event.getMessage();
-					String replyString = thoughts();
+					String replyString = thoughts(m.getContent());
+					addMoodVal(1);
 					try {
 						m.reply(replyString);
 					} catch (IOException | ParseException e) {
@@ -195,7 +218,7 @@ public class MovieBot extends BlankBot{
 	
 	public static void main(String... args) {
 		
-		new MovieBot(args[0], args[1]);
+		new MovieBot("dekobemusic@gmail.com", "123abc");
 
 	}
 }
