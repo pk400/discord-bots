@@ -1,5 +1,5 @@
 package modules;
 
 public enum Type{
-	Greeting,Asked,Appreciation;
+	Greeting,Asked,Appreciation,Question;
 }

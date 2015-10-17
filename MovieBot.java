@@ -52,6 +52,7 @@ public class MovieBot extends BlankBot{
 	
 	public MovieBot(String... args){
 		super();
+		
 		this.movies = new Vector<Movie>();
 		this.run(args[0], args[1]);
 	}
@@ -99,7 +100,6 @@ public class MovieBot extends BlankBot{
 				@Override public void receive(MessageReceivedEvent messageReceivedEvent) {
 					Message m = messageReceivedEvent.getMessage();
 					String replyString = "";
-					subtractMoodVal(1);
 					
 					/*
 					 * Movie stuff starts here
@@ -143,15 +143,24 @@ public class MovieBot extends BlankBot{
 						}
 					} else if (m.getContent().startsWith("@movie")
 							|| m.getContent().startsWith("@info")){
-						Movie movie = new Movie(m.getContent().split(" ", 2)[1]);
-						if(!movie.isValid())
-							replyString = "**sorry, but I could not find information about: **"+m.getContent().split(" ", 2)[1]+".";
-						else
-							replyString = movie.getContent();
-						try {
-							m.reply(replyString);
-						} catch (IOException | ParseException e) {
-							e.printStackTrace();
+						try{
+							Movie movie = new Movie(m.getContent().split(" ", 2)[1]);
+							if(!movie.isValid())
+								replyString = "**sorry, but I could not find information about: **"+m.getContent().split(" ", 2)[1]+".";
+							else
+								replyString = movie.getContent();
+							try {
+								m.reply(replyString);
+							} catch (IOException | ParseException e) {
+								e.printStackTrace();
+							}
+						} catch(ArrayIndexOutOfBoundsException e){
+							replyString = "no movie found.";
+							try {
+								m.reply(replyString);
+							} catch (IOException | ParseException e2) {
+								e2.printStackTrace();
+							}
 						}
 					}
 					/*
@@ -201,7 +210,7 @@ public class MovieBot extends BlankBot{
 				@Override public void receive(MentionEvent event) {
 					Message m = event.getMessage();
 					String replyString = thoughts(m.getContent());
-					addMoodVal(1);
+					addMoodVal(25);
 					try {
 						m.reply(replyString);
 					} catch (IOException | ParseException e) {

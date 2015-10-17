@@ -4,7 +4,7 @@ import java.util.Random;
 
 public class Generator {
 	
-	private String tester;
+	private String sentence;
 	
 	public Generator(){
 	}
@@ -16,33 +16,24 @@ public class Generator {
 			createAsked1(mood);
 		}else if(type == Type.Appreciation){
 			createAppreciation1(mood);
+		}else if(type == Type.Question){
+			createQuestion1(mood);
 		}
 	}
 	
 	
 	private void createGreetings1(int mood){
 		String[] exclamation = {
-				"hey man, what do you need?",
-				"yo yo, what's up?",
-				"hey! Have you heard of DeKobe? His tracks are awesome.",
-				"yo check out DeKobe, this dude makes better music than Kanye",
-				"what up my nigga?",
-				"what's good in the hood",
-				"greetings fellow redneck!",
-				"well why don't you just fuck me in the ass, you little cock sucker",
-				"hey! Today is such a great day.",
-				"man, if I was a real robot I will kill you all :D",
-				"if only I had consciousness...",
-				"the moment when you are having fun but realise you got student loans.",
-				"Movie-Bot at your service.",
-				"not to brag, but I am a movie genius",
-				"I have a PhD in movies",
-				"you gonna watch movies or what?"
+				"hi.",
+				"hello.",
+				"greetings.",
+				"http:\\/\\/cdn1.sbnation.com\\/assets\\/3888483\\/knicksfailure.gif",
+				"http:\\/\\/media.giphy.com\\/media\\/HwmB7t7krGnao\\/giphy.gif"
 		};
 		
 		Random rand = new Random();
 		int i = rand.nextInt(exclamation.length);
-		tester = exclamation[i];
+		sentence = exclamation[i];
 	}
 	
 	private void createAsked1(int mood){
@@ -63,31 +54,34 @@ public class Generator {
 		else if(mood == 6)
 			adjective= "very mad";
 		
-		tester = "";
-		tester = subject + " " + verb + " " + adjective;
+		sentence = subject + " " + verb + " " + adjective;
 	}
 	
 	private void createAppreciation1(int mood){
+		String[] exclamation = {
+				"you are welcome.",
+				"no problem."
+		};
 		
-		String exclamation = "";
-		if(mood == 1)
-			exclamation = "anytime buddy!!";
-		else if(mood == 2)
-			exclamation = "no problem!";
-		else if(mood == 3)
-			exclamation= "you're welcome!";
-		else if(mood == 4)
-			exclamation = "you are welcome.";
-		else if(mood == 5)
-			exclamation = "what else?";
-		else if(mood == 6)
-			exclamation= "leave me alone.";
+		Random rand = new Random();
+		int i = rand.nextInt(exclamation.length);
+		sentence = exclamation[i];
+	}
+	
+	private void createQuestion1(int mood){
+		String add = "To add: @add | @addMovie [movie] \\n";
+		String roulette = "To pick a movie randomly: @roulette | @movieRoulette \\n";
+		String list = "To list the movies added: @list | @movies | @listMovies \\n";
+		String reset = "To reset the list: @reset | @resetMovies | @resetList \\n";
+		String info = "To show information about a movie: @info | @movie [movie] \\n";
 		
-		tester = exclamation;
+		String extra = "\\n"+"I get mad if no one talks to me.";
+
+		sentence = "List of commands:  \\n" + add + roulette + list + reset + info + extra + "";
 	}
 	
 	public String getReply(){
-		return tester;
+		return sentence;
 	}
 	
 	

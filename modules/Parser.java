@@ -10,7 +10,7 @@ public class Parser {
 	}
 	
 	public void parse(String message, int mood){
-		String[] set1 = {"hello","hi","hey","sup","what's up","yo","ay"};
+		String[] set1 = {"hello","hi","hey"};
 		for(String s : set1){
 			if(message.contains(s)){
 				type = Type.Greeting;
@@ -19,7 +19,7 @@ public class Parser {
 			}
 		}
 		
-		String[] set2 = {"how are","going","feeling","mood"};
+		String[] set2 = {"status","you"};
 		for(String s : set2){
 			if(message.contains(s)){
 				type = Type.Asked;
@@ -28,10 +28,19 @@ public class Parser {
 			}
 		}
 		
-		String[] set3 = {"thx","thanks","thank you","ty","tyvm","appreciate it"};
+		String[] set3 = {"thx","thank","ty","appreciate"};
 		for(String s : set3){
 			if(message.contains(s)){
 				type = Type.Appreciation;
+				generator.createReply(type, mood);
+				return;
+			}
+		}
+		
+		String[] set4 = {"help","what","how","?"};
+		for(String s : set4){
+			if(message.contains(s)){
+				type = Type.Question;
 				generator.createReply(type, mood);
 				return;
 			}
