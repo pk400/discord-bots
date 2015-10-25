@@ -33,20 +33,10 @@ import java.util.Random;
 import java.util.Vector;
 
 /**
- * @author qt
- * @since 8:00 PM 16 Aug, 2015
- * Project: DiscordAPI
- * <p>
- * Responds to users that @mention you.
+ * @author jfsaaved
+ * Project: MovieBot
  */
 public class MovieBot extends BlankBot{
-
-	/**
-	 * Starts the bot. This can be done any place you want.
-	 * The main method is for demonstration.
-	 *
-	 * @param args Command line arguments passed to the program.
-	 */
 
 	private Vector<Movie> movies;
 	
@@ -55,6 +45,24 @@ public class MovieBot extends BlankBot{
 		
 		this.movies = new Vector<Movie>();
 		this.run(args[0], args[1]);
+	}
+	
+	private String deleteMovie(Movie m2){
+		if(!m2.isValid())
+			return "that is not a movie.";
+		else if(movies.isEmpty()){
+			return "there are no movies in the list.";
+		}else{
+			int i = 0;
+			for(Movie m : movies){
+				if(m.getImdbLink().equals(m2.getImdbLink())){
+					movies.remove(i);
+					return "I have removed " + m2.getTitle() +".";
+				}
+				i++;
+			}
+		}
+		return "I could not find that movie in the list.";
 	}
 	
 	private String movieRoulette(){
@@ -115,6 +123,14 @@ public class MovieBot extends BlankBot{
 						}
 						try {
 							m.reply(replyString);
+						} catch (IOException | ParseException e) {
+							e.printStackTrace();
+						}
+					}  else if (m.getContent().startsWith("@delete")
+							|| m.getContent().startsWith("@remove")){
+						Movie movie = new Movie(m.getContent().split(" ", 2)[1]);
+						try {
+							m.reply(deleteMovie(movie));
 						} catch (IOException | ParseException e) {
 							e.printStackTrace();
 						}

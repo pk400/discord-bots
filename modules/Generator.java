@@ -70,6 +70,7 @@ public class Generator {
 	
 	private void createQuestion1(int mood){
 		String add = "To add: @add | @addMovie [movie] \\n";
+		String remove = "To remove: @remove | @delete [movie] \\n";
 		String roulette = "To pick a movie randomly: @roulette | @movieRoulette \\n";
 		String list = "To list the movies added: @list | @movies | @listMovies \\n";
 		String reset = "To reset the list: @reset | @resetMovies | @resetList \\n";
@@ -77,7 +78,7 @@ public class Generator {
 		
 		String extra = "\\n"+"I get mad if no one talks to me.";
 
-		sentence = "List of commands:  \\n" + add + roulette + list + reset + info + extra + "";
+		sentence = "List of commands:  \\n" + add + remove + roulette + list + reset + info + extra + "";
 	}
 	
 	public String getReply(){

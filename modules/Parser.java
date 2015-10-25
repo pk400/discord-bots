@@ -19,7 +19,7 @@ public class Parser {
 			}
 		}
 		
-		String[] set2 = {"status","you"};
+		String[] set2 = {"status"};
 		for(String s : set2){
 			if(message.contains(s)){
 				type = Type.Asked;
