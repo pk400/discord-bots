@@ -48,9 +48,12 @@ public class MovieBot extends BlankBot{
 	}
 	
 	private String deleteMovie(Movie m2){
-		if(!m2.isValid())
+		if(!m2.isValid()){
+			subtractMoodVal(3);
 			return "that is not a movie.";
+		}
 		else if(movies.isEmpty()){
+			subtractMoodVal(3);
 			return "there are no movies in the list.";
 		}else{
 			int i = 0;
@@ -62,6 +65,7 @@ public class MovieBot extends BlankBot{
 				i++;
 			}
 		}
+		subtractMoodVal(3);
 		return "I could not find that movie in the list.";
 	}
 	
