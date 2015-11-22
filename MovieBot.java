@@ -27,7 +27,9 @@ import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.Channel;
 import sx.blah.discord.handle.obj.Invite;
 import sx.blah.discord.handle.obj.Message;
+import sx.blah.discord.handle.obj.User;
 
+import java.awt.Window.Type;
 import java.io.IOException;
 import java.util.Random;
 import java.util.Vector;
@@ -38,15 +40,44 @@ import java.util.Vector;
  */
 public class MovieBot extends BlankBot{
 
-	private Vector<Movie> movies;
+	private enum Mode{
+		Normal, Max2;
+	}
 	
+	private Mode mode;
+	private Vector<Movie> movies;
+	private Vector<String> contributor;
+
 	public MovieBot(String... args){
 		super();
 		
+		this.mode = Mode.Normal;
+		this.contributor = new Vector<String>();
 		this.movies = new Vector<Movie>();
 		this.run(args[0], args[1]);
 	}
 	
+	private String addMovie(Movie movie, User user){
+		
+		String message = "error";
+		
+		if(this.mode == Mode.Max2){
+			int counter = 0;
+			for(String name : contributor){
+				if(name.equals(name))
+					counter++;
+			}
+			if(counter >= 2)
+				return "you already added 2 movies.";
+		}
+		
+		movies.add(movie);
+		contributor.add(user.getName());
+		message = movie.getContent();
+		
+		return message;
+	}
+		
 	private String deleteMovie(Movie m2){
 		if(!m2.isValid()){
 			subtractMoodVal(3);
@@ -60,6 +91,7 @@ public class MovieBot extends BlankBot{
 			for(Movie m : movies){
 				if(m.getImdbLink().equals(m2.getImdbLink())){
 					movies.remove(i);
+					contributor.remove(i);
 					return "I have removed " + m2.getTitle() +".";
 				}
 				i++;
@@ -86,8 +118,11 @@ public class MovieBot extends BlankBot{
 			return "you have not added any movies or shows yet.";
 		}else{
 			String returnString = "";
-			for(Movie mv : movies)
-				returnString =  returnString + "\\n" + mv.getTitle();
+			int i = 0;
+			for(Movie mv : movies){
+				returnString =  returnString + "\\n" + mv.getTitle() + " added by: " + contributor.elementAt(i);
+				i++;
+			}
 			return returnString;
 		}
 	}
@@ -99,6 +134,7 @@ public class MovieBot extends BlankBot{
 		}else{
 			String returnString = "I have reset the list.";
 			movies = new Vector<>();
+			contributor = new Vector<>();
 			return returnString;
 		}
 	}
@@ -122,8 +158,7 @@ public class MovieBot extends BlankBot{
 						if(!movie.isValid())
 							replyString = "**sorry, but I could not add: **"+m.getContent().split(" ", 2)[1]+".";
 						else{
-							movies.add(movie);
-							replyString = movies.lastElement().getContent();
+							replyString = addMovie(movie,m.getAuthor());
 						}
 						try {
 							m.reply(replyString);
@@ -158,6 +193,25 @@ public class MovieBot extends BlankBot{
 							|| m.getContent().startsWith("@resetList")){
 						try {
 							m.reply(resetMovies());
+						} catch (IOException | ParseException e) {
+							e.printStackTrace();
+						}
+					} else if(m.getContent().startsWith("@mode")){
+						String type = m.getContent().split(" ", 2)[1];
+						if(type.toLowerCase().equals("one") || type.equals("1") || type.toLowerCase().equals("normal")){
+							mode = Mode.Normal;
+							replyString = "changed mode to: Normal";
+						}else if(type.toLowerCase().equals("two") || type.equals("2") || type.toLowerCase().equals("max 2")){
+							mode = Mode.Max2;
+							replyString = "changed mode to: Maximum of 2 per person";
+						}else if(type.equals("?") || type.toLowerCase().equals("what")){
+							if(mode == Mode.Normal)
+								replyString = "current mode: Normal";
+							else
+								replyString = "current mode: Maximum of 2 per person";
+						}
+						try {
+							m.reply(replyString);
 						} catch (IOException | ParseException e) {
 							e.printStackTrace();
 						}
@@ -247,6 +301,7 @@ public class MovieBot extends BlankBot{
 	
 	public static void main(String... args) {
 		
+		// E-mail and password of a user to be used as a bot
 		new MovieBot("dekobemusic@gmail.com", "123abc");
 
 	}
